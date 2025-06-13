@@ -98,6 +98,7 @@ Hotkeys:
   q  quit
   r  redraw
   p  pause
+  t  toggle transparency
 ';
 
 my $new_fish = 1;
@@ -170,15 +171,7 @@ sub main {
     halfdelay(1);
     #nodelay(1);
 
-    $anim->color(1);
-    if ($transparent) {
-        use_default_colors();
-        my $cid = 1;
-        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
-            init_pair($cid, eval "Curses::COLOR_$f", -1);
-            $cid++;
-        }
-    }
+    init_colors($anim);
 
     my $start_time = time;
     my $paused = 0;
@@ -200,7 +193,12 @@ sub main {
             if    ($in eq 'q') {quit();}  # Exit
             elsif ($in eq 'r' || $in eq KEY_RESIZE()) {last;}  # Redraw (will recreate all objects)
             elsif ($in eq 'p') {$paused = !$paused;}
-            elsif ($screensaver && $in ne '-1') {quit();}      # Exit for any key (screensaver mode)
+            elsif ($in eq 't') {  # Toggle transparency
+                $transparent = !$transparent;
+                init_colors($anim);
+                last;  # Force redraw
+            }
+            elsif ($screensaver && $in ne '-1') {quit();}  # Exit for any key (screensaver mode)
 
             $anim->animate() unless ($paused);
         }
@@ -2456,4 +2454,25 @@ sub rand_color {
         $color_mask =~ s/$i/$color/gm;
     }
     return $color_mask;
+}
+
+sub init_colors {
+    my ($anim) = @_;
+
+    $anim->color(1);
+
+    if ($transparent) {
+        use_default_colors();
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", -1);
+            $cid++;
+        }
+    } else {
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", eval "Curses::COLOR_BLACK");
+            $cid++;
+        }
+    }
 }
