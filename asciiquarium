@@ -99,9 +99,10 @@ Options:
   -v --version      Print version and exit
 
 Hotkeys:
-  q            quit
-  r            redraw
-  p            pause
+  q  quit
+  r  redraw
+  p  pause
+  t  toggle transparency
   space [key]  add new entity, where key is one of
           b        big fish
           B        suBmarine
@@ -187,15 +188,7 @@ sub main {
     halfdelay(1);
     #nodelay(1);
 
-    $anim->color(1);
-    if ($transparent) {
-        use_default_colors();
-        my $cid = 1;
-        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
-            init_pair($cid, eval "Curses::COLOR_$f", -1);
-            $cid++;
-        }
-    }
+    init_colors($anim);
 
     my $start_time = time;
     my $paused = 0;
@@ -217,6 +210,11 @@ sub main {
             if    ($in eq 'q') {quit();}  # Exit
             elsif ($in eq 'r' || $in eq KEY_RESIZE()) {last;}  # Redraw (will recreate all objects)
             elsif ($in eq 'p') {$paused = !$paused;}
+            elsif ($in eq 't') {  # Toggle transparency
+                $transparent = !$transparent;
+                init_colors($anim);
+                last;  # Force redraw
+            }
             elsif ($in eq ' ') {
                 while (1) { # Add creature mode
                     $in = getch();
@@ -243,7 +241,7 @@ sub main {
                     if ($in ne '-1') {last;}
                 }
             }
-            elsif ($screensaver && $in ne '-1') {quit();}      # Exit for any key (screensaver mode)
+            elsif ($screensaver && $in ne '-1') {quit();}  # Exit for any key (screensaver mode)
 
             $anim->animate() unless ($paused);
         }
@@ -2499,4 +2497,25 @@ sub rand_color {
         $color_mask =~ s/$i/$color/gm;
     }
     return $color_mask;
+}
+
+sub init_colors {
+    my ($anim) = @_;
+
+    $anim->color(1);
+
+    if ($transparent) {
+        use_default_colors();
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", -1);
+            $cid++;
+        }
+    } else {
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", eval "Curses::COLOR_BLACK");
+            $cid++;
+        }
+    }
 }

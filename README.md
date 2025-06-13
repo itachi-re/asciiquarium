@@ -43,6 +43,7 @@ Hotkeys:
   q  quit
   r  redraw
   p  pause
+  t  toggle transparency
 ```
 
 ## Historical
