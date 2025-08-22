@@ -55,6 +55,14 @@
 #     various bug fixes and consistency patches
 #     (https://github.com/nothub/asciiquarium/pulls?q=author:planet36)
 #
+#   Hugh Davenport: https://github.com/hughdavenport
+#     add new creature mode
+#     (https://github.com/nothub/asciiquarium/pulls?q=author:hughdavenport)
+#
+#   Viggo Lekdorf: https://github.com/viggou
+#     add transparency toggle hotkey
+#     (https://github.com/nothub/asciiquarium/pulls?q=author:viggou)
+#
 #############################################################################
 # License:
 #
@@ -83,7 +91,7 @@ use Getopt::Long qw(GetOptions);
 use strict;
 use warnings;
 
-my $version = "1.3";
+my $version = "1.4";
 my $help_message = 'Asciiquarium is an aquarium/sea animation in ASCII art.
 Enjoy the mysteries of the sea from the safety of your own terminal!
 
@@ -95,9 +103,24 @@ Options:
   -v --version      Print version and exit
 
 Hotkeys:
-  q  quit
-  r  redraw
-  p  pause
+  q                 quit
+  r                 redraw
+  p                 pause
+  t                 toggle transparency
+  space,            add new entity
+  followed by:
+      b             big fish
+      B             suBmarine
+      d             dolphins
+      D             Ducks
+      h             fishhook
+      m             monster
+      O             swOrd
+      r             random
+      s             ship
+      S             Shark
+      w             whale
+      W             sWan
 ';
 
 my $new_fish = 1;
@@ -170,15 +193,7 @@ sub main {
     halfdelay(1);
     #nodelay(1);
 
-    $anim->color(1);
-    if ($transparent) {
-        use_default_colors();
-        my $cid = 1;
-        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
-            init_pair($cid, eval "Curses::COLOR_$f", -1);
-            $cid++;
-        }
-    }
+    init_colors($anim);
 
     my $start_time = time;
     my $paused = 0;
@@ -200,7 +215,38 @@ sub main {
             if    ($in eq 'q') {quit();}  # Exit
             elsif ($in eq 'r' || $in eq KEY_RESIZE()) {last;}  # Redraw (will recreate all objects)
             elsif ($in eq 'p') {$paused = !$paused;}
-            elsif ($screensaver && $in ne '-1') {quit();}      # Exit for any key (screensaver mode)
+            elsif ($in eq 't') {  # Toggle transparency
+                $transparent = !$transparent;
+                init_colors($anim);
+                last;  # Force redraw
+            }
+            elsif ($in eq ' ') {
+                while (1) { # Add creature mode
+                    $in = getch();
+
+                    if    (lc($in) eq 'q') {quit();}  # Exit elsif ($in eq ' ') {last;}    # Go back to normal mode
+                    elsif (lc($in) eq 'p') {$paused = !$paused;}
+
+                    elsif ($in eq 'b') {add_big_fish(undef, $anim);}
+                    elsif ($in eq 'B') {add_submarine(undef, $anim);}
+                    elsif ($in eq 'd') {add_dolphins(undef, $anim);}
+                    elsif ($in eq 'D') {add_ducks(undef, $anim);}
+                    elsif ($in eq 'h') {add_fishhook(undef, $anim);}
+                    elsif ($in eq 'm') {add_monster(undef, $anim);}
+                    elsif ($in eq 'O') {add_sword_fish(undef, $anim);}
+                    elsif ($in eq 'r') {random_object(undef, $anim);}
+                    elsif ($in eq 's') {add_ship(undef, $anim);}
+                    elsif ($in eq 'S') {add_shark(undef, $anim);}
+                    elsif ($in eq 'w') {add_whale(undef, $anim);}
+                    elsif ($in eq 'W') {add_swan(undef, $anim);}
+
+                    elsif ($screensaver && $in ne '-1') {quit();}      # Exit for any key (screensaver mode)
+
+                    $anim->animate() unless ($paused);
+                    if ($in ne '-1') {last;}
+                }
+            }
+            elsif ($screensaver && $in ne '-1') {quit();}  # Exit for any key (screensaver mode)
 
             $anim->animate() unless ($paused);
         }
@@ -2456,4 +2502,25 @@ sub rand_color {
         $color_mask =~ s/$i/$color/gm;
     }
     return $color_mask;
+}
+
+sub init_colors {
+    my ($anim) = @_;
+
+    $anim->color(1);
+
+    if ($transparent) {
+        use_default_colors();
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", -1);
+            $cid++;
+        }
+    } else {
+        my $cid = 1;
+        for my $f ('WHITE', 'RED', 'GREEN', 'BLUE', 'CYAN', 'MAGENTA', 'YELLOW', 'BLACK') {
+            init_pair($cid, eval "Curses::COLOR_$f", eval "Curses::COLOR_BLACK");
+            $cid++;
+        }
+    }
 }
