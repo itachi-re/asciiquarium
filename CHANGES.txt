@@ -1,5 +1,11 @@
 Changes for Asciiquarium
 
+Version 1.4
+    - Add a mode where you can add creatures (hughdavenport)
+      https://github.com/nothub/asciiquarium/pull/4
+    - Add hotkey 't' to toggle transparency during runtime (viggou)
+      https://github.com/nothub/asciiquarium/pull/5
+
 Version 1.3
     - Change castle color from bright white to white (planet36)
       https://github.com/nothub/asciiquarium/pull/1
