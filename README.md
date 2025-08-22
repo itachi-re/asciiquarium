@@ -40,10 +40,24 @@ Options:
   -v --version      Print version and exit
 
 Hotkeys:
-  q  quit
-  r  redraw
-  p  pause
-  t  toggle transparency
+  q                 quit
+  r                 redraw
+  p                 pause
+  t                 toggle transparency
+  space,            add new entity
+  followed by:
+      b             big fish
+      B             suBmarine
+      d             dolphins
+      D             Ducks
+      h             fishhook
+      m             monster
+      O             swOrd
+      r             random
+      s             ship
+      S             Shark
+      w             whale
+      W             sWan
 ```
 
 ## Historical
