@@ -1,3 +1,4 @@
+[![build result](https://build.opensuse.org/projects/home:itachi_re/packages/asciiquarium/badge.svg?type=default)](https://build.opensuse.org/package/show/home:itachi_re/asciiquarium)
 # Asciiquarium
 
 Asciiquarium is an aquarium/sea animation in ASCII art.  
